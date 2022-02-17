@@ -1,6 +1,6 @@
 module.exports = [
     {
-        title: 'Nome completo (vida real):',
+        title: 'Nome completo',
         limit: 40,
         timer: 1
     },
@@ -17,7 +17,6 @@ module.exports = [
             {
                 title: 'Sim',
                 reaction: '👍',
-                correct: true
             },
             {
                 title: 'Não',
@@ -32,37 +31,30 @@ module.exports = [
             {
                 title: 'Google',
                 reaction: '1️⃣',
-                correct: true
             },
             {
                 title: 'Amigos',
                 reaction: '2️⃣',
-                correct: true
             },
             {
                 title: 'Facebook',
                 reaction: '3️⃣',
-                correct: true
             },
             {
                 title: 'Discord',
                 reaction: '4️⃣',
-                correct: true
             },
             {
                 title: 'Comunidades de NFT',
                 reaction: '5️⃣',
-                correct: true
             },
             {
                 title: 'Twitter',
                 reaction: '6️⃣',
-                correct: true
             },
             {
                 title: 'Outros',
                 reaction: '7️⃣',
-                correct: true
             },
         ],
         timer: 1

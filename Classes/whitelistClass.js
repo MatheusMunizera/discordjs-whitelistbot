@@ -114,9 +114,7 @@ module.exports = class Whitelist {
 
                 this.answers[i] = await (question.answers ? this.getReactionQuestionAnswer(question, embedMessage) : this.getTextQuestionAnswer(question))
             }
-            this.addRoleToUser(config.roles.whitelisted)
-            //TO DO
-            //this.reviewWhitelist()
+            this.addRoleToUser(config.roles.whitelisted)   
         } catch {
             this.message.reply("você demorou mais de 1 minuto para responder a pergunta!")
             this.emit('finished', false)
@@ -176,36 +174,6 @@ module.exports = class Whitelist {
         }
     }
 
-    // async reviewWhitelist() {
-    //     console.log('[FM] REVIEWING WHITELIST')
-    //     this.grade = await this.getUserGrade()
-    //     this.passedWhitelist = this.grade > config.minimumGrade
-
-    //     const userId = this.answers.find(answer => answer.question.type === 'id')
-    //     // const playerExists = await this.userIdExists(userId)
-
-    //     // if(playerExists) {
-    //     //     if(this.passedWhitelist) {
-    //     //         this.sendSuccessMessage()
-    //     //         if(config.roles.whitelisted) {
-    //     //             this.addRoleToUser(config.roles.whitelisted)
-    //     //             this.removeRoleToUser(config.roles.unwhitelisted)
-    //     //             this.setGameWhitelist(userId, 1)
-    //     //         }
-    //     //     } else {
-    //     //         this.sendFailureMessage()
-    //     //         if(config.roles.unwhitelisted) {
-    //     //             this.addRoleToUser(config.roles.unwhitelisted)
-    //     //             this.removeRoleToUser(config.roles.whitelisted)
-    //     //         }
-    //     //     }
-            
-    //     //     this.setUserName(userId)
-    //     //     this.setUserDiscordIdentifier(userId, this.message.author.id)
-    //     // } else {
-    //     //     this.sendFailureMessage(config.messages.idNotFound)
-    //     // }
-    // }
 
     addRoleToUser(roleName) {
         const role = this.message.guild.roles.cache.find(role => role.name === roleName)
@@ -221,84 +189,10 @@ module.exports = class Whitelist {
         }
     }
 
-    setUserName(userId) {
-        const userNameAnswer = this.answers.find(answer => answer.question.type === 'username')
-        if(userNameAnswer) {
-            this.message.member.setNickname(`${userNameAnswer.answer} [${userId}]`)
-        }
-    } 
 
-    setGameWhitelist(userId, whitelisted) {
-        this.dbConnection.query(`UPDATE ${config.databaseTable} SET ${config.databaseColumn} = ${whitelisted} WHERE id = ${userId}`, err => {
-            if(err) {
-                throw Error(err)
-            }
-        })
-    }
-
-    setUserDiscordIdentifier(userId, discordId) {
-        this.dbConnection.query(`INSERT INTO vrp_user_ids (identifier, user_id) VALUES("discord:${discordId}", ${userId}) ON DUPLICATE KEY UPDATE identifier = "discord:${discordId}"`, err => {
-            if(err) {
-                throw Error(err)
-            }
-        })
-    }
-
-    // userIdExists(userId) {
-    //     return new Promise((resolve, reject) => {
-    //         this.dbConnection.query(`SELECT * FROM vrp_users WHERE id = ${userId} AND whitelisted = 0`,(result ) => {
-    //             console.log(result,result.length,resolve())
-    //             resolve(result.length)    
-    //         })
-    //     })
-    // }
-
-    async sendSuccessMessage() {
-        const channel = this.message.guild.channels.cache.find(channel => channel.name === config.successChannel)
-        if(!channel) {
-            throw Error('Success channel not found!')
-        }
-
-        const embed = await this.getEmbed()
-            .setDescription(`
-                Bem-Vindo a nossa cidade <@${this.message.author.id}>!
-                ${config.messages.success}
-            `)
-
-        channel.send({
-            content: `<@${this.message.author.id}>`,
-            embed
-        })
-    }
-
-    async sendFailureMessage(message = config.messages.failure) {
-        const channel = this.message.guild.channels.cache.find(channel => channel.name === config.failureChannel)
-        if(!channel) {
-            throw Error('Failure channel not found!')
-        }
-
-        const embed = await this.getEmbed()
-            .setDescription(`
-                Você foi reprovado em nossa whitelist <@${this.message.author.id}>!
-                Acertou: ${this.correctAnswers.length} / **${questions.length}**
-                **${message}**
-            `)
-            .setFooter(`Você pode realizar a whitelist quando quiser, vá até o canal whitelist para tentar novamente.`)
-            // .setFooter(`Você só pode realizar a whitelist ${config.maximumTries} vezes cada ${config.cooldown / 60} horas.`)
-
-        channel.send({
-            content: `<@${this.message.author.id}>`,
-            embed
-        })
-    }
-
-    async getUserGrade() {
-        this.correctAnswers = this.answers.filter(answer => answer.correct)
-        return this.correctAnswers.length / questions.length * 10
-    }
 
     async destroy() {
-        console.log('[FM] REMOVING CHANNEL')
+        console.log('[MELB] APAGANDO CANAL')
         await this.channel.delete()
         this.emit('finished', {
             answers: this.answers,
@@ -327,3 +221,4 @@ module.exports = class Whitelist {
         }
     }
 }
+
