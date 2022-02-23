@@ -6,7 +6,7 @@ const questionsConfig = require('../Configs/questionsConfig.js')
 module.exports = class Whitelist {
     events = {}
     answers = []
-    
+    description = [];
 
     constructor({ client, message }) {
         this.client = client
@@ -18,6 +18,7 @@ module.exports = class Whitelist {
         try {
             await this.createChannel()
             await this.loopTroughQuestions()
+            await this.setDescriptionAnswer()
             await this.sendAnswersAndQuestions()
 
         } catch (err) {
@@ -53,24 +54,60 @@ module.exports = class Whitelist {
             throw Error(err)
         }
     }
-  
 
-    sendAnswersAndQuestions()
+    async setDescriptionAnswer(){
+       
+        this.answers.forEach(e => {
+            this.description.push(`**Pergunta: **
+            ${e.question.title}
+            `)
+            
+            this.description.push(`**Resposta: **
+            ${e.answer}
+            `)
+        })
+             
+    }
+
+    async sendAnswersAndQuestions()
     {
         return new Promise((resolve,reject) => {
             
             let canal = this.client.channels.cache.get("942948335080341565")
-            let embed = new Discord.MessageEmbed()
-            .setTitle(`${this.message.reply} - Whitelist`)
-            .setColor(config.embedColor)
-            .setDescription(`Aqui está suas perguntas e respostas de seu questionario:
-            **Pergunta:** ${e.question.title}
-            **Resposta:** ${e.answer}`)
-            .setThumbnail(this.client.user.avatarURL)
+            
+            console.log("Users", this.message.author)
+        
+            
+            //let avatar = this.message.author.user.avatarURL({ dynamic: true, format: "png", size: 1024 });
+            
+           
+            let resp =  new MessageEmbed()
+                .setTitle("Aqui está suas perguntas e respostas de seu questionario")
+                .setColor(config.embedColor)
+                .setImage(`https://cdn.discordapp.com/avatars/${this.message.author.id}/${this.message.author.avatar}.webp?size=128`)
+                // size=64
+                .setDescription( this.description )
 
-            setInterval(() => {
-                canal.send({content: `{client.message.author.username}`, embeds: [embed]})
-            }, interval);
+            
+                .setAuthor(this.client.user.tag)
+
+                    canal.send({ 
+                        content: `<@${this.message.author.id}>`,
+                        embed: resp
+                    });
+
+                
+
+            //.setTitle(`${this.message.reply} - Whitelist`)
+           // .setColor(config.embedColor)
+            // .setDescription(`Aqui está suas perguntas e respostas de seu questionario:
+            // **Pergunta:** ${e.question.title}
+            // **Resposta:** ${e.answer}`)
+            // .setThumbnail(this.client.user.avatarURL)
+
+            // setInterval(() => {
+            //     canal.send({content: `{client.message.author.username}`, embeds: [embed]})
+            // }, interval);
         })
 
             // this.answers.forEach(e => {
@@ -78,7 +115,7 @@ module.exports = class Whitelist {
                     
             //     `Aqui está suas perguntas e respostas de seu questionario:
             //     **Pergunta:** ${e.question.title}
-            //     **Resposta:** ${e.answer}`)
+            //     **Pergunta:** ${e.question.title}
 
 
             // });
@@ -243,6 +280,8 @@ module.exports = class Whitelist {
             .setColor(config.embedColor)
             .setThumbnail(config.serverIcon)
     }
+
+    
 
     on(eventName, eventMethod) {
         if(typeof this.events[eventName] === 'undefined') {
