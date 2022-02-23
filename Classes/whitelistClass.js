@@ -1,10 +1,12 @@
 const questions = require('../Configs/questionsConfig.js')
 const config = require('../Configs/whitelistConfig.js')
-const { MessageEmbed } = require('discord.js')
+const { MessageEmbed, DiscordAPIError } = require('discord.js')
+const questionsConfig = require('../Configs/questionsConfig.js')
 
 module.exports = class Whitelist {
     events = {}
     answers = []
+    
 
     constructor({ client, message }) {
         this.client = client
@@ -16,6 +18,8 @@ module.exports = class Whitelist {
         try {
             await this.createChannel()
             await this.loopTroughQuestions()
+            await this.sendAnswersAndQuestions()
+
         } catch (err) {
             console.error(err)
         }
@@ -44,11 +48,46 @@ module.exports = class Whitelist {
                     },
                 ]
             })
-            console.log(this.message.author)
+           
         } catch (err) {
             throw Error(err)
         }
     }
+  
+
+    sendAnswersAndQuestions()
+    {
+        return new Promise((resolve,reject) => {
+            
+            let canal = this.client.channels.cache.get("942948335080341565")
+            let embed = new Discord.MessageEmbed()
+            .setTitle(`${this.message.reply} - Whitelist`)
+            .setColor(config.embedColor)
+            .setDescription(`Aqui está suas perguntas e respostas de seu questionario:
+            **Pergunta:** ${e.question.title}
+            **Resposta:** ${e.answer}`)
+            .setThumbnail(this.client.user.avatarURL)
+
+            setInterval(() => {
+                canal.send({content: `{client.message.author.username}`, embeds: [embed]})
+            }, interval);
+        })
+
+            // this.answers.forEach(e => {
+            //     this.message.reply(
+                    
+            //     `Aqui está suas perguntas e respostas de seu questionario:
+            //     **Pergunta:** ${e.question.title}
+            //     **Resposta:** ${e.answer}`)
+
+
+            // });
+           
+
+        }
+        
+        
+    
 
     sendWelcomeMessage() {
         return new Promise((resolve, reject) => {
@@ -57,8 +96,7 @@ module.exports = class Whitelist {
 
                     Olá <@${this.message.author.id}> ! Como vai?
                     
-                    Digite:
-                    
+                   Espero que esteja bem. Para começar a whitelist, digite:                    
                     ${config.messages.welcome}
 
                     Para dar inicio ao questionário!
@@ -105,15 +143,21 @@ module.exports = class Whitelist {
                         ${question.answers ? `${question.answers.map(answer => `${answer.reaction} - ${answer.title}`).join('\n\n')} \n\n **Obs: espere todas as reações aparecerem antes de responder.**` : ``}
                     `)
                     .setFooter(`Você tem ${question.timer} minuto(s) para responder essa pergunta.`)
-    
+
+     
                 const embedMessage = await this.channel.send(embed)
 
                 if(question.answers) {
                     await Promise.all(question.answers.map(async answer => embedMessage.react(answer.reaction)))
                 }
 
-                this.answers[i] = await (question.answers ? this.getReactionQuestionAnswer(question, embedMessage) : this.getTextQuestionAnswer(question))
+                this.answers[i] = await this.getTextQuestionAnswer(question)
+
+                
+
             }
+          
+            this.removeRoleToUser(config.roles.noWhitelisted)
             this.addRoleToUser(config.roles.whitelisted)   
         } catch {
             this.message.reply("você demorou mais de 1 minuto para responder a pergunta!")
@@ -131,20 +175,12 @@ module.exports = class Whitelist {
                     try {
                         await this.channel.bulkDelete(99)
                         this.client.removeListener('message', readMessage)
-                        let correct = true
+                        //CONTEUDO DAS RESPOSTAS
+                       // console.log(message.content)
                         
-                        if(question.type === 'number') {
-                            const reg = new RegExp(/^\d+$/)
-                            correct = reg.test(message.content)
-
-                            if(typeof question.minimum === 'number') {
-                                correct = parseInt(message.content) > question.minimum
-                            }
-                        }
 
                         resolve({ 
                             answer: message.content,
-                            correct,
                             question,
                         })
                     } catch (err) {
@@ -159,20 +195,20 @@ module.exports = class Whitelist {
         })
     }
 
-    async getReactionQuestionAnswer(question, message) {
-        const timer = question.timer * 60000
+    // async getReactionQuestionAnswer(question, message) {
+    //     const timer = question.timer * 60000
         
-        const reactionsFilter = (reaction, user) => question.answers.map(answer => answer.reaction).includes(reaction.emoji.name) && user.id === this.message.author.id
-        const collected = await message.awaitReactions(reactionsFilter, { max: 1, time: timer, errors: ['time'] })
+    //     const reactionsFilter = (reaction, user) => question.answers.map(answer => answer.reaction).includes(reaction.emoji.name) && user.id === this.message.author.id
+    //     const collected = await message.awaitReactions(reactionsFilter, { max: 1, time: timer, errors: ['time'] })
         
-        await this.channel.bulkDelete(99)
-        const reaction = collected.first()
+    //     await this.channel.bulkDelete(99)
+    //     const reaction = collected.first()
         
-        return { 
-            ...question.answers.find(answer => answer.reaction === reaction.emoji.name),
-            question,
-        }
-    }
+    //     return { 
+    //         ...question.answers.find(answer => answer.reaction === reaction.emoji.name),
+    //         question,
+    //     }
+    // }
 
 
     addRoleToUser(roleName) {

@@ -7,10 +7,16 @@ const commands = {
 	'whitelist': require('../Commands/whitelistCommand')
 }
 
+
+
+
 client.on("ready", () => {
     console.log(` [MELB] O PAI ESTÁ ON! COM O NOME: ${client.user.tag}!`)
     console.log('Desenvolvido por: Felipe & Muniz')
+    // client.user.setStatus("https://twitch.tv/munizeral");
+    // client.user.setActivity("Sua mae gemeno",{type: "LISTENING"} );
 })
+
 
 client.on("message", message => {
 	const channel = message.guild.channels.cache.find(channel => channel.name === config.workChannel)
