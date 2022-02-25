@@ -24,7 +24,8 @@ module.exports = {
         `,
     },
     roles: {
-        whitelisted: "NFTier-1"
+        whitelisted: "NFTier-1",
+        noWhitelisted: "User"
     },
     successChannel: 'sucessfull',
     failureChannel: 'reprovados',

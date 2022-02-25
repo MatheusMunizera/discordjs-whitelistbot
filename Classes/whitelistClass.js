@@ -1,10 +1,12 @@
 const questions = require('../Configs/questionsConfig.js')
 const config = require('../Configs/whitelistConfig.js')
-const { MessageEmbed } = require('discord.js')
+const { MessageEmbed, DiscordAPIError } = require('discord.js')
+const questionsConfig = require('../Configs/questionsConfig.js')
 
 module.exports = class Whitelist {
     events = {}
     answers = []
+    description = [];
 
     constructor({ client, message }) {
         this.client = client
@@ -16,6 +18,9 @@ module.exports = class Whitelist {
         try {
             await this.createChannel()
             await this.loopTroughQuestions()
+            await this.setDescriptionAnswer()
+            await this.sendAnswersAndQuestions()
+
         } catch (err) {
             console.error(err)
         }
@@ -44,11 +49,82 @@ module.exports = class Whitelist {
                     },
                 ]
             })
-            console.log(this.message.author)
+           
         } catch (err) {
             throw Error(err)
         }
     }
+
+    async setDescriptionAnswer(){
+       
+        this.answers.forEach(e => {
+            this.description.push(`**Pergunta: **
+            ${e.question.title}
+            `)
+            
+            this.description.push(`**Resposta: **
+            ${e.answer}
+            `)
+        })
+             
+    }
+
+    async sendAnswersAndQuestions()
+    {
+        return new Promise((resolve,reject) => {
+            
+            let canal = this.client.channels.cache.get("942948335080341565")
+            
+            console.log("Users", this.message.author)
+        
+            
+            //let avatar = this.message.author.user.avatarURL({ dynamic: true, format: "png", size: 1024 });
+            
+           
+            let resp =  new MessageEmbed()
+                .setTitle("Aqui está suas perguntas e respostas de seu questionario")
+                .setColor(config.embedColor)
+                .setImage(`https://cdn.discordapp.com/avatars/${this.message.author.id}/${this.message.author.avatar}.webp?size=128`)
+                // size=64
+                .setDescription( this.description )
+
+            
+                .setAuthor(this.client.user.tag)
+
+                    canal.send({ 
+                        content: `<@${this.message.author.id}>`,
+                        embed: resp
+                    });
+
+                
+
+            //.setTitle(`${this.message.reply} - Whitelist`)
+           // .setColor(config.embedColor)
+            // .setDescription(`Aqui está suas perguntas e respostas de seu questionario:
+            // **Pergunta:** ${e.question.title}
+            // **Resposta:** ${e.answer}`)
+            // .setThumbnail(this.client.user.avatarURL)
+
+            // setInterval(() => {
+            //     canal.send({content: `{client.message.author.username}`, embeds: [embed]})
+            // }, interval);
+        })
+
+            // this.answers.forEach(e => {
+            //     this.message.reply(
+                    
+            //     `Aqui está suas perguntas e respostas de seu questionario:
+            //     **Pergunta:** ${e.question.title}
+            //     **Pergunta:** ${e.question.title}
+
+
+            // });
+           
+
+        }
+        
+        
+    
 
     sendWelcomeMessage() {
         return new Promise((resolve, reject) => {
@@ -57,8 +133,7 @@ module.exports = class Whitelist {
 
                     Olá <@${this.message.author.id}> ! Como vai?
                     
-                    Digite:
-                    
+                   Espero que esteja bem. Para começar a whitelist, digite:                    
                     ${config.messages.welcome}
 
                     Para dar inicio ao questionário!
@@ -105,18 +180,22 @@ module.exports = class Whitelist {
                         ${question.answers ? `${question.answers.map(answer => `${answer.reaction} - ${answer.title}`).join('\n\n')} \n\n **Obs: espere todas as reações aparecerem antes de responder.**` : ``}
                     `)
                     .setFooter(`Você tem ${question.timer} minuto(s) para responder essa pergunta.`)
-    
+
+     
                 const embedMessage = await this.channel.send(embed)
 
                 if(question.answers) {
                     await Promise.all(question.answers.map(async answer => embedMessage.react(answer.reaction)))
                 }
 
-                this.answers[i] = await (question.answers ? this.getReactionQuestionAnswer(question, embedMessage) : this.getTextQuestionAnswer(question))
+                this.answers[i] = await this.getTextQuestionAnswer(question)
+
+                
+
             }
-            this.addRoleToUser(config.roles.whitelisted)
-            //TO DO
-            //this.reviewWhitelist()
+          
+            this.removeRoleToUser(config.roles.noWhitelisted)
+            this.addRoleToUser(config.roles.whitelisted)   
         } catch {
             this.message.reply("você demorou mais de 1 minuto para responder a pergunta!")
             this.emit('finished', false)
@@ -133,20 +212,12 @@ module.exports = class Whitelist {
                     try {
                         await this.channel.bulkDelete(99)
                         this.client.removeListener('message', readMessage)
-                        let correct = true
+                        //CONTEUDO DAS RESPOSTAS
+                       // console.log(message.content)
                         
-                        if(question.type === 'number') {
-                            const reg = new RegExp(/^\d+$/)
-                            correct = reg.test(message.content)
-
-                            if(typeof question.minimum === 'number') {
-                                correct = parseInt(message.content) > question.minimum
-                            }
-                        }
 
                         resolve({ 
                             answer: message.content,
-                            correct,
                             question,
                         })
                     } catch (err) {
@@ -161,51 +232,21 @@ module.exports = class Whitelist {
         })
     }
 
-    async getReactionQuestionAnswer(question, message) {
-        const timer = question.timer * 60000
+    // async getReactionQuestionAnswer(question, message) {
+    //     const timer = question.timer * 60000
         
-        const reactionsFilter = (reaction, user) => question.answers.map(answer => answer.reaction).includes(reaction.emoji.name) && user.id === this.message.author.id
-        const collected = await message.awaitReactions(reactionsFilter, { max: 1, time: timer, errors: ['time'] })
+    //     const reactionsFilter = (reaction, user) => question.answers.map(answer => answer.reaction).includes(reaction.emoji.name) && user.id === this.message.author.id
+    //     const collected = await message.awaitReactions(reactionsFilter, { max: 1, time: timer, errors: ['time'] })
         
-        await this.channel.bulkDelete(99)
-        const reaction = collected.first()
+    //     await this.channel.bulkDelete(99)
+    //     const reaction = collected.first()
         
-        return { 
-            ...question.answers.find(answer => answer.reaction === reaction.emoji.name),
-            question,
-        }
-    }
-
-    // async reviewWhitelist() {
-    //     console.log('[FM] REVIEWING WHITELIST')
-    //     this.grade = await this.getUserGrade()
-    //     this.passedWhitelist = this.grade > config.minimumGrade
-
-    //     const userId = this.answers.find(answer => answer.question.type === 'id')
-    //     // const playerExists = await this.userIdExists(userId)
-
-    //     // if(playerExists) {
-    //     //     if(this.passedWhitelist) {
-    //     //         this.sendSuccessMessage()
-    //     //         if(config.roles.whitelisted) {
-    //     //             this.addRoleToUser(config.roles.whitelisted)
-    //     //             this.removeRoleToUser(config.roles.unwhitelisted)
-    //     //             this.setGameWhitelist(userId, 1)
-    //     //         }
-    //     //     } else {
-    //     //         this.sendFailureMessage()
-    //     //         if(config.roles.unwhitelisted) {
-    //     //             this.addRoleToUser(config.roles.unwhitelisted)
-    //     //             this.removeRoleToUser(config.roles.whitelisted)
-    //     //         }
-    //     //     }
-            
-    //     //     this.setUserName(userId)
-    //     //     this.setUserDiscordIdentifier(userId, this.message.author.id)
-    //     // } else {
-    //     //     this.sendFailureMessage(config.messages.idNotFound)
-    //     // }
+    //     return { 
+    //         ...question.answers.find(answer => answer.reaction === reaction.emoji.name),
+    //         question,
+    //     }
     // }
+
 
     addRoleToUser(roleName) {
         const role = this.message.guild.roles.cache.find(role => role.name === roleName)
@@ -221,84 +262,10 @@ module.exports = class Whitelist {
         }
     }
 
-    setUserName(userId) {
-        const userNameAnswer = this.answers.find(answer => answer.question.type === 'username')
-        if(userNameAnswer) {
-            this.message.member.setNickname(`${userNameAnswer.answer} [${userId}]`)
-        }
-    } 
 
-    setGameWhitelist(userId, whitelisted) {
-        this.dbConnection.query(`UPDATE ${config.databaseTable} SET ${config.databaseColumn} = ${whitelisted} WHERE id = ${userId}`, err => {
-            if(err) {
-                throw Error(err)
-            }
-        })
-    }
-
-    setUserDiscordIdentifier(userId, discordId) {
-        this.dbConnection.query(`INSERT INTO vrp_user_ids (identifier, user_id) VALUES("discord:${discordId}", ${userId}) ON DUPLICATE KEY UPDATE identifier = "discord:${discordId}"`, err => {
-            if(err) {
-                throw Error(err)
-            }
-        })
-    }
-
-    // userIdExists(userId) {
-    //     return new Promise((resolve, reject) => {
-    //         this.dbConnection.query(`SELECT * FROM vrp_users WHERE id = ${userId} AND whitelisted = 0`,(result ) => {
-    //             console.log(result,result.length,resolve())
-    //             resolve(result.length)    
-    //         })
-    //     })
-    // }
-
-    async sendSuccessMessage() {
-        const channel = this.message.guild.channels.cache.find(channel => channel.name === config.successChannel)
-        if(!channel) {
-            throw Error('Success channel not found!')
-        }
-
-        const embed = await this.getEmbed()
-            .setDescription(`
-                Bem-Vindo a nossa cidade <@${this.message.author.id}>!
-                ${config.messages.success}
-            `)
-
-        channel.send({
-            content: `<@${this.message.author.id}>`,
-            embed
-        })
-    }
-
-    async sendFailureMessage(message = config.messages.failure) {
-        const channel = this.message.guild.channels.cache.find(channel => channel.name === config.failureChannel)
-        if(!channel) {
-            throw Error('Failure channel not found!')
-        }
-
-        const embed = await this.getEmbed()
-            .setDescription(`
-                Você foi reprovado em nossa whitelist <@${this.message.author.id}>!
-                Acertou: ${this.correctAnswers.length} / **${questions.length}**
-                **${message}**
-            `)
-            .setFooter(`Você pode realizar a whitelist quando quiser, vá até o canal whitelist para tentar novamente.`)
-            // .setFooter(`Você só pode realizar a whitelist ${config.maximumTries} vezes cada ${config.cooldown / 60} horas.`)
-
-        channel.send({
-            content: `<@${this.message.author.id}>`,
-            embed
-        })
-    }
-
-    async getUserGrade() {
-        this.correctAnswers = this.answers.filter(answer => answer.correct)
-        return this.correctAnswers.length / questions.length * 10
-    }
 
     async destroy() {
-        console.log('[FM] REMOVING CHANNEL')
+        console.log('[MELB] APAGANDO CANAL')
         await this.channel.delete()
         this.emit('finished', {
             answers: this.answers,
@@ -314,6 +281,8 @@ module.exports = class Whitelist {
             .setThumbnail(config.serverIcon)
     }
 
+    
+
     on(eventName, eventMethod) {
         if(typeof this.events[eventName] === 'undefined') {
             this.events[eventName] = []
@@ -327,3 +296,4 @@ module.exports = class Whitelist {
         }
     }
 }
+

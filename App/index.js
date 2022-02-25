@@ -7,10 +7,16 @@ const commands = {
 	'whitelist': require('../Commands/whitelistCommand')
 }
 
+
+
+
 client.on("ready", () => {
-    console.log(` O PAI ESTÁ ON! COM O NOME: ${client.user.tag}!`)
+    console.log(` [MELB] O PAI ESTÁ ON! COM O NOME: ${client.user.tag}!`)
     console.log('Desenvolvido por: Felipe & Muniz')
+    // client.user.setStatus("https://twitch.tv/munizeral");
+    // client.user.setActivity("Sua mae gemeno",{type: "LISTENING"} );
 })
+
 
 client.on("message", message => {
 	const channel = message.guild.channels.cache.find(channel => channel.name === config.workChannel)
@@ -27,28 +33,3 @@ client.on("message", message => {
 })
 
 client.login(config.discordClientId);
-
-
-
-// client.on("ready", () => {
-//     client.user.setStatus("online");n
-// });
-
-// const prefix = "."
-
-// client.on("message", message =>{
-//     // Não respondendo mensagem de bot e mensagem sem o prefix
-//     if (message.author.bot) return;
-//     if(!message.content.startsWith(prefix)) return;
-   
-//     const commandBody = message.content.slice(prefix.length);
-
-//     const args = commandBody.split(' ');
-//     const command = args.shift().toLocaleLowerCase();
-
-    
-//     if(command === "whitelist"){
-//         message.reply(`Seja bem vindo a Whitelist do nosso servidor!`)
-//     }
-//  })
-
