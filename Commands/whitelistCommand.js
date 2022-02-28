@@ -1,6 +1,7 @@
 const Whitelist = require('../Classes/whitelistClass');
-const config = require('../Configs/whitelistConfig');
 const moment = require('moment-timezone');
+
+const config = require('../Configs/channelsConfig.json');
 
 const usersCooldown = {}
 const whitelists = {}

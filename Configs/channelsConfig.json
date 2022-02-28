@@ -1,0 +1,23 @@
+{
+  "maximumTries": 20,
+  "cooldown": 5,
+    "createdChannel": 
+        {
+            "name": "📋│whitelist-",
+            "type": "text"
+        },
+    "workChannel": "📋│whitelist",
+    "roles": { 
+             "whitelisted": "NFTier-1",
+             "noWhitelisted": "User"
+            },
+    "answersChannel": 
+    {
+        "name": "sucessfull",
+        "id": 942948335080341565
+    },
+    "failureChannel": "reprovados",
+    "prefix": "!"
+    
+
+} 

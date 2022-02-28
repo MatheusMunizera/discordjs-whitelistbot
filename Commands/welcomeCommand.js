@@ -1,17 +1,12 @@
 const { MessageEmbed } = require('discord.js')
+const embedConfig =  require('../Configs/embedConfig.js')
+
 
 module.exports = ({ message }) => {
     const embed = new MessageEmbed()
-        .setTitle('Whitelist')
-        .setColor(0xEf2172)
-        .setThumbnail('https://miro.medium.com/max/1400/1*iqFvVfidr3HOgupVbywvKA.png')
-        .setDescription(`
-            Eaí, tranquilo?
-                Seja bem vindo a nossa comunidade de NFT!
-            
-            Para realizar whitelist, digite: 
-            \`\`\`\!whitelist\`\`\`\
-            E siga as minhas instruções.
-        `)
+        .setTitle( embedConfig.welcome.title)
+        .setColor(embedConfig.welcome.color)
+        .setThumbnail(embedConfig.welcome.thumbnail)
+        .setDescription(embedConfig.welcome.description)
     message.channel.send(embed)
 }
