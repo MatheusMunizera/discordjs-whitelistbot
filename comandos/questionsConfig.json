@@ -1,0 +1,18 @@
+[
+  {
+    "title": "What are your favorite projects?",
+    "limit": "300",
+    "timer": "2"
+  },
+  {
+    "title": " What skills do you have? (ie. Web developer, business development, so on) ",
+    "limit": "300",
+    "timer": "2"
+  },
+  {
+    "title": "Tell us about yourself",
+    "limit": "500",
+    "timer": "5"
+  }
+  ]
+  

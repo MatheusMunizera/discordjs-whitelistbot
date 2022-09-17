@@ -1,0 +1,29 @@
+{
+    "maximumTries": 20,
+    "cooldown": 5,
+      "createdChannel": 
+          {
+              "name": "📋│Intro - ",
+              "type": "text"
+          },
+      "workChannel": "✨・step-2-intro"
+      ,
+      "roles": { 
+               "whitelisted": "Introduction",
+               "noWhitelisted": "💤・Sleeper"
+              },
+      "answersChannel": 
+      {
+          "name": "🌂・introductions",
+          "id": 959545454046085180
+      },
+      "failureChannel":
+      {
+          "name": "❌・timeout",
+          "id": 960914132868169739
+          },
+          
+      "prefix": "!"
+      
+  
+  } 

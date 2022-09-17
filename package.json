@@ -1,0 +1,29 @@
+{
+  "name": "wlbot",
+  "version": "0.0.1",
+  "description": "Questionario de perguntas que ao fim adiciona um cargo",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon App/index.js",
+    "start": "nodemon App/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:MatheusMunizera/wlbot.git"
+  },
+  "author": "MelbTeam",
+  "license": "ISC",
+  "dependencies": {
+    "discord-rpc": "^4.0.1",
+    "discord.js": "12.2.0",
+    "dotenv": "8.2.0",
+    "moment-timezone": "0.5.31"
+  },
+  "bugs": {
+    "url": "https://github.com/MatheusMunizera/wlbot/issues"
+  },
+  "homepage": "https://github.com/MatheusMunizera/wlbot#readme",
+  "devDependencies": {
+    "nodemon": "^2.0.15"
+  }
+}
